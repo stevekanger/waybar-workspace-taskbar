@@ -62,16 +62,32 @@ WindowManagerClickHandler window_manager_spec_get_click_handler(
     WindowManagerSpec *self,
     WindowManagerClickHandlerType type
 ) {
-    if(type == WM_CLICK_FOCUS) {
-        return self->window_focus;
+    if(type == WM_CLICK_ACTIVATE) {
+        return self->window_activate;
     }
 
     if(type == WM_CLICK_CLOSE) {
         return self->window_close;
     }
 
-    if(type == WM_CLICK_FLOAT) {
-        return self->window_float;
+    if(type == WM_CLICK_TOGGLE_FLOAT) {
+        return self->window_toggle_float;
+    }
+
+    if(type == WM_CLICK_MINIMIZE) {
+        return self->window_minimize;
+    }
+
+    if(type == WM_CLICK_MAXIMIZE) {
+        return self->window_maximize;
+    }
+
+    if(type == WM_CLICK_FULLSCREEN) {
+        return self->window_fullscreen;
+    }
+
+    if(type == WM_CLICK_MINIMIZE_RAISE) {
+        return self->window_minimize_raise;
     }
 
     return NULL;

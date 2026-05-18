@@ -23,6 +23,9 @@ struct _WwtConfig {
     NavigationBtnPos navigation_btn_pos;
     gchar *navigation_btn_prev_label;
     gchar *navigation_btn_next_label;
+    gchar *on_click;
+    gchar *on_click_middle;
+    gchar *on_click_right;
 };
 
 G_DEFINE_TYPE(WwtConfig, wwt_config, G_TYPE_OBJECT);
@@ -155,6 +158,36 @@ gchar *wwt_config_get_navigation_btn_next_label(WwtConfig *self) {
  */
 NavigationBtnPos wwt_config_get_navigation_btn_pos(WwtConfig *self) {
     return self->navigation_btn_pos;
+}
+
+/**
+ * Gets the on-click value
+ *
+ * @param self
+ * @return The on-click value
+ */
+const char *wwt_config_get_on_click(WwtConfig *self) {
+    return self->on_click;
+}
+
+/**
+ * Gets the on-click-middle value
+ *
+ * @param self
+ * @return The on-click-middle value
+ */
+const char *wwt_config_get_on_click_middle(WwtConfig *self) {
+    return self->on_click_middle;
+}
+
+/**
+ * Gets the on-click-right value
+ *
+ * @param self
+ * @return The on-click-right value
+ */
+const char *wwt_config_get_on_click_right(WwtConfig *self) {
+    return self->on_click_right;
 }
 
 /**
@@ -313,6 +346,27 @@ static void parse_config_entries(
                 g_strdup(navigation_btn_next_label);
         }
 
+        if(strcmp("on-click", config_entries[i].key) == 0) {
+            const char *on_click = json_node_get_string(node);
+
+            g_free(self->on_click);
+            self->on_click = g_strdup(on_click);
+        }
+
+        if(strcmp("on-click-middle", config_entries[i].key) == 0) {
+            const char *on_click_middle = json_node_get_string(node);
+
+            g_free(self->on_click_middle);
+            self->on_click_middle = g_strdup(on_click_middle);
+        }
+
+        if(strcmp("on-click-right", config_entries[i].key) == 0) {
+            const char *on_click_right = json_node_get_string(node);
+
+            g_free(self->on_click_right);
+            self->on_click_right = g_strdup(on_click_right);
+        }
+
         g_object_unref(parser);
     }
 }
@@ -338,6 +392,21 @@ static void dispose(GObject *obj) {
     if(self->navigation_btn_next_label) {
         g_free(self->navigation_btn_next_label);
         self->navigation_btn_next_label = NULL;
+    }
+
+    if(self->on_click) {
+        g_free(self->on_click);
+        self->on_click = NULL;
+    }
+
+    if(self->on_click_middle) {
+        g_free(self->on_click_middle);
+        self->on_click_middle = NULL;
+    }
+
+    if(self->on_click_right) {
+        g_free(self->on_click_right);
+        self->on_click_right = NULL;
     }
 
     G_OBJECT_CLASS(wwt_config_parent_class)->dispose(obj);
@@ -372,6 +441,9 @@ static void wwt_config_init(WwtConfig *self) {
     self->navigation_btn_pos = NAVIGATION_BTN_POS_STAGGERED;
     self->navigation_btn_prev_label = g_strdup("<");
     self->navigation_btn_next_label = g_strdup(">");
+    self->on_click = g_strdup("activate");
+    self->on_click_middle = g_strdup("toggle-float");
+    self->on_click_right = g_strdup("close");
 }
 
 /**

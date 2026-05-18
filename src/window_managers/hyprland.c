@@ -89,7 +89,7 @@ static gboolean events_validator(WindowManagerEvent *event) {
  * @param id The window id
  * @return Whether the command was successfully executed
  */
-static gboolean window_focus(const char *id) {
+static gboolean window_activate(const char *id) {
     return wm_click_execute("hyprctl dispatch 'hl.dsp.focus({window=\"address:%s\"})'", id);
 }
 
@@ -109,8 +109,48 @@ static gboolean window_close(const char *id) {
  * @param id The window id
  * @return Whether the command was successfully executed
  */
-static gboolean window_float(const char *id) {
+static gboolean window_toggle_float(const char *id) {
     return wm_click_execute("hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:%s\"})'", id);
+}
+
+/**
+ * Click handler to minimize the window
+ *
+ * @param id The window id
+ * @return Whether the command was successfully executed
+ */
+static gboolean window_minimize(const char *id) {
+    return wm_click_execute("hyprctl dispatch 'hl.dsp.window.minimize({window=\"address:%s\"})'", id);
+}
+
+/**
+ * Click handler to maximize the window
+ *
+ * @param id The window id
+ * @return Whether the command was successfully executed
+ */
+static gboolean window_maximize(const char *id) {
+    return wm_click_execute("hyprctl dispatch 'hl.dsp.window.maximize({window=\"address:%s\"})'", id);
+}
+
+/**
+ * Click handler to toggle fullscreen the window
+ *
+ * @param id The window id
+ * @return Whether the command was successfully executed
+ */
+static gboolean window_fullscreen(const char *id) {
+    return wm_click_execute("hyprctl dispatch fullscreen address:%s", id);
+}
+
+/**
+ * Click handler to minimize-raise the window
+ *
+ * @param id The window id
+ * @return Whether the command was successfully executed
+ */
+static gboolean window_minimize_raise(const char *id) {
+    return wm_click_execute("hyprctl dispatch 'hl.dsp.focus({window=\"address:%s\"})'", id);
 }
 
 /**
@@ -260,9 +300,13 @@ WindowManagerSpec *window_manager_spec_create_hyprland() {
     spec->events_reader = events_reader;
     spec->events_validator = events_validator;
     spec->data_fetcher = data_fetcher;
-    spec->window_focus = window_focus;
+    spec->window_activate = window_activate;
     spec->window_close = window_close;
-    spec->window_float = window_float;
+    spec->window_toggle_float = window_toggle_float;
+    spec->window_minimize = window_minimize;
+    spec->window_maximize = window_maximize;
+    spec->window_fullscreen = window_fullscreen;
+    spec->window_minimize_raise = window_minimize_raise;
 
     return spec;
 }

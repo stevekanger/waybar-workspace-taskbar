@@ -145,7 +145,7 @@ void wwt_taskbar_shift_focus(
     WwtServices *services = wwt_app_get_services(self->app);
     WindowManagerSpec *spec = wwt_services_get_window_manager_spec(services);
     WindowManagerClickHandler focus_window =
-        window_manager_spec_get_click_handler(spec, WM_CLICK_FOCUS);
+        window_manager_spec_get_click_handler(spec, WM_CLICK_ACTIVATE);
     GPtrArray *wins = get_display_windows(self);
 
     if(!wins || wins->len == 0) {

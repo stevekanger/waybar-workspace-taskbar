@@ -90,7 +90,7 @@ static gboolean events_validator(WindowManagerEvent *event) {
  * @param id The window id
  * @return Whether the command was successfully executed
  */
-static gboolean window_focus(const char *id) {
+static gboolean window_activate(const char *id) {
     return wm_click_execute("niri msg action focus-window --id %s", id);
 }
 
@@ -110,11 +110,57 @@ static gboolean window_close(const char *id) {
  * @param id The window id
  * @return Whether the command was successfully executed
  */
-static gboolean window_float(const char *id) {
+static gboolean window_toggle_float(const char *id) {
     return wm_click_execute(
         "niri msg action toggle-window-floating --id %s",
         id
     );
+}
+
+/**
+ * Click handler to minimize the window. Niri does not support minimize.
+ *
+ * @param id The window id
+ * @return FALSE always
+ */
+static gboolean window_minimize(const char *id) {
+    g_warning("Niri does not support minimize action");
+    return FALSE;
+}
+
+/**
+ * Click handler to maximize the window. Niri does not support maximize.
+ *
+ * @param id The window id
+ * @return FALSE always
+ */
+static gboolean window_maximize(const char *id) {
+    g_warning("Niri does not support maximize action");
+    return FALSE;
+}
+
+/**
+ * Click handler to toggle fullscreen the window
+ *
+ * @param id The window id
+ * @return Whether the command was successfully executed
+ */
+static gboolean window_fullscreen(const char *id) {
+    return wm_click_execute(
+        "niri msg action toggle-window-fullscreen --id %s",
+        id
+    );
+}
+
+/**
+ * Click handler to minimize-raise the window. Niri does not support minimize,
+ * so we just focus/activate the window.
+ *
+ * @param id The window id
+ * @return Whether the command was successfully executed
+ */
+static gboolean window_minimize_raise(const char *id) {
+    return wm_click_execute("niri msg action focus-window --id %s", id);
 }
 
 /**
@@ -291,9 +337,13 @@ WindowManagerSpec *window_manager_spec_create_niri() {
     spec->events_reader = events_reader;
     spec->events_validator = events_validator;
     spec->data_fetcher = data_fetcher;
-    spec->window_focus = window_focus;
+    spec->window_activate = window_activate;
     spec->window_close = window_close;
-    spec->window_float = window_float;
+    spec->window_toggle_float = window_toggle_float;
+    spec->window_minimize = window_minimize;
+    spec->window_maximize = window_maximize;
+    spec->window_fullscreen = window_fullscreen;
+    spec->window_minimize_raise = window_minimize_raise;
 
     return spec;
 }

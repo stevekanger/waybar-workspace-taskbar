@@ -137,6 +137,42 @@ static void set_title_and_icon(WwtTab *self) {
 }
 
 /**
+ * Maps a config action string to the corresponding enum type
+ *
+ * @param action_str The action string from config
+ * @return The WindowManagerClickHandlerType enum value
+ */
+static WindowManagerClickHandlerType resolve_action(const char *action_str) {
+    if(action_str[0] == '\0') {
+        return WM_CLICK_NONE;
+    }
+    if(g_strcmp0(action_str, "activate") == 0) {
+        return WM_CLICK_ACTIVATE;
+    }
+    if(g_strcmp0(action_str, "close") == 0) {
+        return WM_CLICK_CLOSE;
+    }
+    if(g_strcmp0(action_str, "toggle-float") == 0) {
+        return WM_CLICK_TOGGLE_FLOAT;
+    }
+    if(g_strcmp0(action_str, "minimize") == 0) {
+        return WM_CLICK_MINIMIZE;
+    }
+    if(g_strcmp0(action_str, "maximize") == 0) {
+        return WM_CLICK_MAXIMIZE;
+    }
+    if(g_strcmp0(action_str, "fullscreen") == 0) {
+        return WM_CLICK_FULLSCREEN;
+    }
+    if(g_strcmp0(action_str, "minimize-raise") == 0) {
+        return WM_CLICK_MINIMIZE_RAISE;
+    }
+
+    g_warning("Unknown action: %s", action_str);
+    return WM_CLICK_ACTIVATE;
+}
+
+/**
  * Handle the button click event
  *
  * @param widget The button instance
@@ -150,9 +186,10 @@ static gboolean on_button_press(
     gpointer user_data
 ) {
     WwtTab *tab = WWT_TAB(widget);
+    WwtConfig *config = wwt_app_get_config(tab->app);
     WwtServices *services = wwt_app_get_services(tab->app);
 
-    if(!services) {
+    if(!services || !config) {
         return TRUE;
     }
 
@@ -162,26 +199,33 @@ static gboolean on_button_press(
         return TRUE;
     }
 
-    WindowManagerClickHandler window_focus =
-        window_manager_spec_get_click_handler(spec, WM_CLICK_FOCUS);
-    WindowManagerClickHandler window_close =
-        window_manager_spec_get_click_handler(spec, WM_CLICK_CLOSE);
-    WindowManagerClickHandler window_float =
-        window_manager_spec_get_click_handler(spec, WM_CLICK_FLOAT);
+    const char *action_str = NULL;
 
     // Left click
     if(event->button == 1) {
-        window_focus(tab->win_id);
+        action_str = wwt_config_get_on_click(config);
     }
 
     // Middle click
     if(event->button == 2) {
-        window_float(tab->win_id);
+        action_str = wwt_config_get_on_click_middle(config);
     }
 
     // Right click
     if(event->button == 3) {
-        window_close(tab->win_id);
+        action_str = wwt_config_get_on_click_right(config);
+    }
+
+    if(!action_str) {
+        return TRUE;
+    }
+
+    WindowManagerClickHandlerType action_type = resolve_action(action_str);
+    WindowManagerClickHandler handler =
+        window_manager_spec_get_click_handler(spec, action_type);
+
+    if(handler) {
+        handler(tab->win_id);
     }
 
     return TRUE; // Stop propogation

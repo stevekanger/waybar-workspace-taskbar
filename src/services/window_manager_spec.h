@@ -15,9 +15,14 @@ typedef enum WindowManagerId {
 } WindowManagerId;
 
 typedef enum {
-    WM_CLICK_FOCUS,
-    WM_CLICK_FLOAT,
-    WM_CLICK_CLOSE
+    WM_CLICK_NONE,
+    WM_CLICK_ACTIVATE,
+    WM_CLICK_CLOSE,
+    WM_CLICK_TOGGLE_FLOAT,
+    WM_CLICK_MINIMIZE,
+    WM_CLICK_MAXIMIZE,
+    WM_CLICK_FULLSCREEN,
+    WM_CLICK_MINIMIZE_RAISE,
 } WindowManagerClickHandlerType;
 
 typedef int (*WindowManagerEventsConstructor)();
@@ -37,9 +42,13 @@ typedef struct WindowManagerSpec {
     WindowManagerEventsReader events_reader;
     WindowManagerEventsValidator events_validator;
     WindowManagerDataFetcher data_fetcher;
-    WindowManagerClickHandler window_focus;
+    WindowManagerClickHandler window_activate;
     WindowManagerClickHandler window_close;
-    WindowManagerClickHandler window_float;
+    WindowManagerClickHandler window_toggle_float;
+    WindowManagerClickHandler window_minimize;
+    WindowManagerClickHandler window_maximize;
+    WindowManagerClickHandler window_fullscreen;
+    WindowManagerClickHandler window_minimize_raise;
 } WindowManagerSpec;
 
 WindowManagerEventsConstructor window_manager_spec_get_events_constructor(

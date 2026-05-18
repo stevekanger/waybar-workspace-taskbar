@@ -78,6 +78,26 @@ Even though your using jsonc waybar doesn't parse out the comments when passing 
 | navigation_btn_pos        | no       | 0        | 0 = staggered, 1 = before, 2 = after     | Position of the navigation buttons. Before tabs, after tabs, or staggered one on each side.                                                           |
 | navigation_btn_prev_label | no       | "<"      | string                                   | The label for the navigation prev button.                                                                                                             |
 | navigation_btn_next_label | no       | ">"      | string                                   | The label for the navigation next button.                                                                                                             |
+| on-click                  | no       | "activate" | action string                          | Action on left click. Set to `""` to disable.                                                                                                          |
+| on-click-middle           | no       | "toggle-float" | action string                      | Action on middle click. Set to `""` to disable.                                                                                                       |
+| on-click-right            | no       | "close"    | action string                          | Action on right click. Set to `""` to disable.                                                                                                         |
+
+### Actions
+
+The following actions are supported for `on-click`, `on-click-middle`, and `on-click-right`:
+
+| Action           | Description                                      | Sway       | Hyprland   | Niri         |
+|------------------|--------------------------------------------------|------------|------------|--------------|
+| `activate`       | Focus / bring window to foreground               | ✅         | ✅         | ✅           |
+| `close`          | Close the window                                 | ✅         | ✅         | ✅           |
+| `toggle-float`   | Toggle floating state                            | ✅         | ✅         | ✅           |
+| `minimize`       | Minimize the window                              | ⚠️ scratchpad | ✅      | ❌ no-op     |
+| `maximize`       | Maximize the window                              | ⚠️ fullscreen | ✅     | ❌ no-op     |
+| `fullscreen`     | Toggle fullscreen                                | ✅         | ✅         | ✅           |
+| `minimize-raise` | Focus if not active, minimize if active          | ⚠️ activate | ✅     | ⚠️ activate  |
+
+⚠️ = Partial support (uses workaround)
+❌ = Not supported (logs warning)
 
 ### Configuring Styles
 
@@ -141,11 +161,13 @@ The css parent/child structure is as follows:
 
 ## Usage
 
-This is fairly simple.
+Click actions are configurable via `on-click`, `on-click-middle`, and `on-click-right` options.
 
-- Left Click: Focus Window
-- Right Click: Close Window
+Defaults:
+
+- Left Click: Activate (focus) Window
 - Middle Click: Toggle Float
+- Right Click: Close Window
 
 ## Known issues
 
