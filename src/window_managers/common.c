@@ -11,7 +11,7 @@
  * @return TRUE if success else FALSE
  */
 gboolean wm_click_execute(const char *format, const char *id) {
-    char cmd[64];
+    char cmd[256];
     snprintf(cmd, sizeof(cmd), format, id);
 
     cmd_send(cmd);

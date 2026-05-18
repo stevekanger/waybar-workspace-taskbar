@@ -90,7 +90,7 @@ static gboolean events_validator(WindowManagerEvent *event) {
  * @return Whether the command was successfully executed
  */
 static gboolean window_focus(const char *id) {
-    return wm_click_execute("hyprctl dispatch focuswindow address:%s", id);
+    return wm_click_execute("hyprctl dispatch 'hl.dsp.focus({window=\"address:%s\"})'", id);
 }
 
 /**
@@ -100,7 +100,7 @@ static gboolean window_focus(const char *id) {
  * @return Whether the command was successfully executed
  */
 static gboolean window_close(const char *id) {
-    return wm_click_execute("hyprctl dispatch closewindow address:%s", id);
+    return wm_click_execute("hyprctl dispatch 'hl.dsp.window.close({window=\"address:%s\"})'", id);
 }
 
 /**
@@ -110,7 +110,7 @@ static gboolean window_close(const char *id) {
  * @return Whether the command was successfully executed
  */
 static gboolean window_float(const char *id) {
-    return wm_click_execute("hyprctl dispatch togglefloating address:%s", id);
+    return wm_click_execute("hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:%s\"})'", id);
 }
 
 /**
