@@ -20,6 +20,7 @@ Currently supported window managers.
 
 You must have some required packages installed. Look to your package manager for the correct installation of each.
 
+- c compiler (Gcc/Clang)
 - make
 - meson
 - gtk+-3.0 version >=3.22.0
