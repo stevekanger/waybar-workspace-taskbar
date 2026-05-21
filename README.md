@@ -78,6 +78,44 @@ Even though your using jsonc waybar doesn't parse out the comments when passing 
 | navigation_btn_pos        | no       | 0        | 0 = staggered, 1 = before, 2 = after     | Position of the navigation buttons. Before tabs, after tabs, or staggered one on each side.                                                           |
 | navigation_btn_prev_label | no       | "<"      | string                                   | The label for the navigation prev button.                                                                                                             |
 | navigation_btn_next_label | no       | ">"      | string                                   | The label for the navigation next button.                                                                                                             |
+| on_click_left             | no       | (see below) | format string with `%s` for window ID  | Command to run on left click. `%s` is replaced with the window ID. Set to `""` to disable.                                                            |
+| on_click_middle           | no       | (see below) | format string with `%s` for window ID  | Command to run on middle click. `%s` is replaced with the window ID. Set to `""` to disable.                                                          |
+| on_click_right            | no       | (see below) | format string with `%s` for window ID  | Command to run on right click. `%s` is replaced with the window ID. Set to `""` to disable.                                                           |
+
+### Click Command Defaults
+
+Default click commands are set automatically based on your `window_manager`. You can override them or use any custom command:
+
+**Hyprland defaults:**
+
+```json
+"on_click_left": "hyprctl dispatch focuswindow address:%s",
+"on_click_middle": "hyprctl dispatch togglefloating address:%s",
+"on_click_right": "hyprctl dispatch closewindow address:%s"
+```
+
+**Sway defaults:**
+
+```json
+"on_click_left": "swaymsg \"[con_id=%s] focus\"",
+"on_click_middle": "swaymsg \"[con_id=%s] floating toggle\"",
+"on_click_right": "swaymsg \"[con_id=%s] kill\""
+```
+
+**Niri defaults:**
+
+```json
+"on_click_left": "niri msg action focus-window --id %s",
+"on_click_middle": "niri msg action set-app-examples-floating --id %s --toggle",
+"on_click_right": "niri msg action close-window --id %s"
+```
+
+You can use any command — including custom scripts. For example:
+
+```json
+"on_click_left": "my-custom-script.sh %s",
+"on_click_right": ""
+```
 
 ### Configuring Styles
 
@@ -141,11 +179,13 @@ The css parent/child structure is as follows:
 
 ## Usage
 
-This is fairly simple.
+Click actions are configurable via `on_click_left`, `on_click_middle`, and `on_click_right`. By default:
 
 - Left Click: Focus Window
-- Right Click: Close Window
 - Middle Click: Toggle Float
+- Right Click: Close Window
+
+See the Click Command Defaults section above to customize or disable click actions.
 
 ## Known issues
 

@@ -23,6 +23,9 @@ struct _WwtConfig {
     NavigationBtnPos navigation_btn_pos;
     gchar *navigation_btn_prev_label;
     gchar *navigation_btn_next_label;
+    gchar *on_click_left;
+    gchar *on_click_middle;
+    gchar *on_click_right;
 };
 
 G_DEFINE_TYPE(WwtConfig, wwt_config, G_TYPE_OBJECT);
@@ -155,6 +158,36 @@ gchar *wwt_config_get_navigation_btn_next_label(WwtConfig *self) {
  */
 NavigationBtnPos wwt_config_get_navigation_btn_pos(WwtConfig *self) {
     return self->navigation_btn_pos;
+}
+
+/**
+ * Gets the on_click_left format string
+ *
+ * @param self
+ * @return The on_click_left format string
+ */
+const char *wwt_config_get_on_click_left(WwtConfig *self) {
+    return self->on_click_left;
+}
+
+/**
+ * Gets the on_click_middle format string
+ *
+ * @param self
+ * @return The on_click_middle format string
+ */
+const char *wwt_config_get_on_click_middle(WwtConfig *self) {
+    return self->on_click_middle;
+}
+
+/**
+ * Gets the on_click_right format string
+ *
+ * @param self
+ * @return The on_click_right format string
+ */
+const char *wwt_config_get_on_click_right(WwtConfig *self) {
+    return self->on_click_right;
 }
 
 /**
@@ -313,6 +346,33 @@ static void parse_config_entries(
                 g_strdup(navigation_btn_next_label);
         }
 
+        if(strcmp("on_click_left", config_entries[i].key) == 0) {
+            const char *on_click_left = json_node_get_string(node);
+
+            if(on_click_left && on_click_left[0] != '\0') {
+                g_free(self->on_click_left);
+                self->on_click_left = g_strdup(on_click_left);
+            }
+        }
+
+        if(strcmp("on_click_middle", config_entries[i].key) == 0) {
+            const char *on_click_middle = json_node_get_string(node);
+
+            if(on_click_middle && on_click_middle[0] != '\0') {
+                g_free(self->on_click_middle);
+                self->on_click_middle = g_strdup(on_click_middle);
+            }
+        }
+
+        if(strcmp("on_click_right", config_entries[i].key) == 0) {
+            const char *on_click_right = json_node_get_string(node);
+
+            if(on_click_right && on_click_right[0] != '\0') {
+                g_free(self->on_click_right);
+                self->on_click_right = g_strdup(on_click_right);
+            }
+        }
+
         g_object_unref(parser);
     }
 }
@@ -338,6 +398,21 @@ static void dispose(GObject *obj) {
     if(self->navigation_btn_next_label) {
         g_free(self->navigation_btn_next_label);
         self->navigation_btn_next_label = NULL;
+    }
+
+    if(self->on_click_left) {
+        g_free(self->on_click_left);
+        self->on_click_left = NULL;
+    }
+
+    if(self->on_click_middle) {
+        g_free(self->on_click_middle);
+        self->on_click_middle = NULL;
+    }
+
+    if(self->on_click_right) {
+        g_free(self->on_click_right);
+        self->on_click_right = NULL;
     }
 
     G_OBJECT_CLASS(wwt_config_parent_class)->dispose(obj);
@@ -398,6 +473,57 @@ WwtConfig *wwt_config_new(
     WwtConfig *self = g_object_new(WWT_CONFIG_TYPE, NULL);
 
     parse_config_entries(self, config_entries, config_entries_len);
+
+    // Set WM-specific default click commands if user didn't override them
+    if(self->window_manager_id == WM_ID_HYPRLAND) {
+        if(!self->on_click_left) {
+            self->on_click_left = g_strdup(
+                "hyprctl dispatch focuswindow address:%s"
+            );
+        }
+        if(!self->on_click_middle) {
+            self->on_click_middle = g_strdup(
+                "hyprctl dispatch togglefloating address:%s"
+            );
+        }
+        if(!self->on_click_right) {
+            self->on_click_right = g_strdup(
+                "hyprctl dispatch closewindow address:%s"
+            );
+        }
+    } else if(self->window_manager_id == WM_ID_SWAY) {
+        if(!self->on_click_left) {
+            self->on_click_left = g_strdup(
+                "swaymsg \"[con_id=%s] focus\""
+            );
+        }
+        if(!self->on_click_middle) {
+            self->on_click_middle = g_strdup(
+                "swaymsg \"[con_id=%s] floating toggle\""
+            );
+        }
+        if(!self->on_click_right) {
+            self->on_click_right = g_strdup(
+                "swaymsg \"[con_id=%s] kill\""
+            );
+        }
+    } else if(self->window_manager_id == WM_ID_NIRI) {
+        if(!self->on_click_left) {
+            self->on_click_left = g_strdup(
+                "niri msg action focus-window --id %s"
+            );
+        }
+        if(!self->on_click_middle) {
+            self->on_click_middle = g_strdup(
+                "niri msg action set-app-examples-floating --id %s --toggle"
+            );
+        }
+        if(!self->on_click_right) {
+            self->on_click_right = g_strdup(
+                "niri msg action close-window --id %s"
+            );
+        }
+    }
 
     return self;
 }

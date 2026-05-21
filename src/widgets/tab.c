@@ -1,5 +1,6 @@
 #include "tab.h"
 #include "core/app.h"
+#include "window_managers/common.h"
 #include "core/config.h"
 #include "core/services.h"
 #include "services/app_icons.h"
@@ -150,38 +151,31 @@ static gboolean on_button_press(
     gpointer user_data
 ) {
     WwtTab *tab = WWT_TAB(widget);
-    WwtServices *services = wwt_app_get_services(tab->app);
+    WwtConfig *config = wwt_app_get_config(tab->app);
 
-    if(!services) {
+    if(!config) {
         return TRUE;
     }
 
-    WindowManagerSpec *spec = wwt_services_get_window_manager_spec(services);
-
-    if(!spec) {
-        return TRUE;
-    }
-
-    WindowManagerClickHandler window_focus =
-        window_manager_spec_get_click_handler(spec, WM_CLICK_FOCUS);
-    WindowManagerClickHandler window_close =
-        window_manager_spec_get_click_handler(spec, WM_CLICK_CLOSE);
-    WindowManagerClickHandler window_float =
-        window_manager_spec_get_click_handler(spec, WM_CLICK_FLOAT);
+    const char *format = NULL;
 
     // Left click
     if(event->button == 1) {
-        window_focus(tab->win_id);
+        format = wwt_config_get_on_click_left(config);
     }
 
     // Middle click
     if(event->button == 2) {
-        window_float(tab->win_id);
+        format = wwt_config_get_on_click_middle(config);
     }
 
     // Right click
     if(event->button == 3) {
-        window_close(tab->win_id);
+        format = wwt_config_get_on_click_right(config);
+    }
+
+    if(format) {
+        wm_click_execute(format, tab->win_id);
     }
 
     return TRUE; // Stop propogation
