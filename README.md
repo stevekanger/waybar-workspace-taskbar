@@ -91,7 +91,18 @@ Options use `kebab-case` in key names for spaces to follow most of the waybar co
 
 Click actions are commands to run on certain clicks. The window id will be passed in via the replace character `{id}`. Each command will be forked to a new process. Here are some common examples.
 
-Hyprland
+Hyprland Lua
+
+```json
+{
+  "on-click": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'",
+  "on-click-middle": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'",
+  "on-click-right": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'",
+  "navigation-btn-on-click": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'"
+}
+```
+
+or hyprland hyprlang
 
 ```json
 {
