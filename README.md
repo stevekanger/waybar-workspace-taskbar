@@ -82,6 +82,47 @@ Options use `kebab-case` in key names for spaces to follow most of the waybar co
 | navigation-btn-pos        | no       | 0        | 0 = staggered, 1 = before, 2 = after     | Position of the navigation buttons. Before tabs, after tabs, or staggered one on each side.                                                           |
 | navigation-btn-prev-label | no       | "<"      | string                                   | The label for the navigation prev button.                                                                                                             |
 | navigation-btn-next-label | no       | ">"      | string                                   | The label for the navigation next button.                                                                                                             |
+| on-click                  | no       | NULL     | string                                   | The command to run when left clicking a tab. See [Configuring Click Actions](#configuring-click-actions)                                              |
+| on-click-middle           | no       | NULL     | string                                   | The command to run when middle clicking a tab. See [Configuring Click Actions](#configuring-click-actions)                                            |
+| on-click-right            | no       | NULL     | string                                   | The command to run when right clicking a tab. See [Configuring Click Actions](#configuring-click-actions)                                             |
+| navigation-btn-on-click   | no       | NULL     | string                                   | The command to run when left clicking a navigation button. See [Configuring Click Actions](#configuring-click-actions)                                |
+
+### Configuring Click Actions
+
+Click actions are commands to run on certain clicks. The window id will be passed in via the replace character `{id}`. Each command will be forked to a new process. Here are some common examples.
+
+Hyprland's lua syntax example
+
+```json
+{
+    "on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'"
+    "on-click-middle": "hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:{id}\"})'"
+    "on-click-right": "hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:{id}\"})'"
+    "navigation-btn-on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'"
+}
+```
+
+Niri
+
+```json
+{
+    "on-click": "niri msg action focus-window --id {id}"
+    "on-click-middle": "niri msg action toggle-window-floating --id {id}"
+    "on-click-right": "niri msg action close-window --id {id}"
+    "navigation-btn-on-click": "niri msg action focus-window --id {id}"
+}
+```
+
+Sway
+
+```json
+{
+    "on-click": "swaymsg \"[con_id={id}] focus\""
+    "on-click-middle": "swaymsg \"[con_id={id}] floating toggle\""
+    "on-click-right": "swaymsg \"[con_id={id}] kill\""
+    "navigation-btn-on-click": "swaymsg \"[con_id={id}] focus\""
+}
+```
 
 ### Configuring Styles
 
@@ -142,14 +183,6 @@ The css parent/child structure is as follows:
   <NavigationBtnNext />
 </Taskbar>
 ```
-
-## Usage
-
-This is fairly simple.
-
-- Left Click: Focus Window
-- Right Click: Close Window
-- Middle Click: Toggle Float
 
 ## Known issues
 

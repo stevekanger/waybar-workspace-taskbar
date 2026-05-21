@@ -30,14 +30,21 @@ static void handle_click(gpointer user_data) {
 
     if(self->type == NAVIGATION_BTN_TYPE_PREV) {
         gchar *win_id = wwt_taskbar_get_focus_win_id(self->taskbar, -1);
-        g_autofree gchar *cmd =
-            str_replace(navigation_btn_on_click, "{id}", win_id);
-        cmd_fork_exec(cmd);
+
+        if(win_id) {
+            g_autofree gchar *cmd =
+                str_replace(navigation_btn_on_click, "{id}", win_id);
+            cmd_fork_exec(cmd);
+        }
+
     } else {
         gchar *win_id = wwt_taskbar_get_focus_win_id(self->taskbar, 1);
-        g_autofree gchar *cmd =
-            str_replace(navigation_btn_on_click, "{id}", win_id);
-        cmd_fork_exec(cmd);
+
+        if(win_id) {
+            g_autofree gchar *cmd =
+                str_replace(navigation_btn_on_click, "{id}", win_id);
+            cmd_fork_exec(cmd);
+        }
     }
 }
 

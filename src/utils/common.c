@@ -71,8 +71,8 @@ long long get_timestamp() {
  * @param str The string you want to be replaced
  * @param find The characters to find
  * @param replace The characters you want to replace with
- * @return A new string with the characters replaced (caller frees memory using
- * g_free())
+ * @return (transfer full) A new string with the characters replaced (caller
+ * frees using g_free())
  */
 gchar *str_replace(const char *str, const char *find, const char *replace) {
     GString *g_str = g_string_new(str);
