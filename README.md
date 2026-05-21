@@ -124,6 +124,14 @@ Sway
 }
 ```
 
+you may also pass in custom scripts like:
+
+```json
+{
+  "on-click": "~/path/to/my/script {id}"
+}
+```
+
 ### Configuring Styles
 
 A couple of css classes will be applied so you can style things accordingly.
