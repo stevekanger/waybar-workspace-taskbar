@@ -95,10 +95,10 @@ Hyprland's lua syntax example
 
 ```json
 {
-    "on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'"
-    "on-click-middle": "hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:{id}\"})'"
-    "on-click-right": "hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:{id}\"})'"
-    "navigation-btn-on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'"
+  "on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'",
+  "on-click-middle": "hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:{id}\"})'",
+  "on-click-right": "hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:{id}\"})'",
+  "navigation-btn-on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'"
 }
 ```
 
@@ -106,10 +106,10 @@ Niri
 
 ```json
 {
-    "on-click": "niri msg action focus-window --id {id}"
-    "on-click-middle": "niri msg action toggle-window-floating --id {id}"
-    "on-click-right": "niri msg action close-window --id {id}"
-    "navigation-btn-on-click": "niri msg action focus-window --id {id}"
+  "on-click": "niri msg action focus-window --id {id}",
+  "on-click-middle": "niri msg action toggle-window-floating --id {id}",
+  "on-click-right": "niri msg action close-window --id {id}",
+  "navigation-btn-on-click": "niri msg action focus-window --id {id}"
 }
 ```
 
@@ -117,10 +117,10 @@ Sway
 
 ```json
 {
-    "on-click": "swaymsg \"[con_id={id}] focus\""
-    "on-click-middle": "swaymsg \"[con_id={id}] floating toggle\""
-    "on-click-right": "swaymsg \"[con_id={id}] kill\""
-    "navigation-btn-on-click": "swaymsg \"[con_id={id}] focus\""
+  "on-click": "swaymsg \"[con_id={id}] focus\"",
+  "on-click-middle": "swaymsg \"[con_id={id}] floating toggle\"",
+  "on-click-right": "swaymsg \"[con_id={id}] kill\"",
+  "navigation-btn-on-click": "swaymsg \"[con_id={id}] focus\""
 }
 ```
 
