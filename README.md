@@ -102,7 +102,7 @@ Hyprland Lua
 }
 ```
 
-or hyprland hyprlang
+Hyprland Hyprlang
 
 ```json
 {

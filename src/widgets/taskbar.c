@@ -122,14 +122,11 @@ static GPtrArray *get_display_windows(WwtTaskbar *self) {
     WwtConfig *config = wwt_app_get_config(self->app);
     const gchar *output = wwt_config_get_output(config);
 
-    GPtrArray *wins = NULL;
     if(output) {
-        wins = window_manager_data_get_windows_on_output(self->wm_data, output);
-    } else {
-        wins = window_manager_data_get_windows_on_focused(self->wm_data);
+        return window_manager_data_get_windows_on_output(self->wm_data, output);
     }
 
-    return wins;
+    return window_manager_data_get_windows_on_focused(self->wm_data);
 }
 
 /**
@@ -147,8 +144,7 @@ gchar *wwt_taskbar_get_focus_win_id(WwtTaskbar *self, int offset) {
         return NULL;
     }
 
-    int focused_index = get_focused_index(self, wins);
-    int index = CLAMP(focused_index + offset, 0, (int)wins->len - 1);
+    int index = CLAMP(self->prev_focused_index + offset, 0, (int)wins->len - 1);
     WindowManagerWindow *win = g_ptr_array_index(wins, index);
 
     if(!win) {
