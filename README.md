@@ -95,10 +95,10 @@ Hyprland Lua
 
 ```json
 {
-  "on-click": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'",
-  "on-click-middle": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'",
-  "on-click-right": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'",
-  "navigation-btn-on-click": "hyprctl dispatch 'hl.dsp.focus({ window = \"address:{id}\" })'"
+  "on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'",
+  "on-click-middle": "hyprctl dispatch 'hl.dsp.window.float({action=\"toggle\",window=\"address:{id}\"})'",
+  "on-click-right": "hyprctl dispatch 'hl.dsp.window.close({window=\"address:{id}\"})'",
+  "navigation-btn-on-click": "hyprctl dispatch 'hl.dsp.focus({window=\"address:{id}\"})'"
 }
 ```
 
