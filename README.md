@@ -18,7 +18,7 @@ Currently supported window managers.
 
 ## Building and Installation
 
-You must have some required packages installed. Look to your package manager for the correct installation of each.
+You must be on linux and have some required packages installed. Look to your package manager for the correct installation of each.
 
 - c compiler (Gcc/Clang)
 - make
@@ -64,7 +64,7 @@ Note: You may need to use absolute paths depending on your environment.
 
 Even though your using jsonc waybar doesn't parse out the comments when passing them to the cffi module. So as of right now keep your comments outside the cffi module config.
 
-Options use `kebab-case` in key names for spaces to follow most of the waybar convention. It should be noted that `module_path` is a waybar specific option that uses `snake_case`.
+Options use `kebab-case` in key names for spaces to follow most of the waybar convention. Although `module_path` is a waybar specific option that uses `snake_case`.
 
 | Option                    | Required | Default  | Allowed                                  | Description                                                                                                                                           |
 | ------------------------- | -------- | -------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
