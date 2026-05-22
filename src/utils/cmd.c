@@ -48,7 +48,7 @@ int cmd_fork_exec(const char *cmd) {
 /**
  * Send a command on the same process no output
  *
- * @param cmd The command to send
+ * @param cmd The command to run
  * @return The return value of system()
  */
 int cmd_send(const char *cmd) {
@@ -58,7 +58,7 @@ int cmd_send(const char *cmd) {
 /**
  * Send a command and get the output
  *
- * @param cmd The command to send
+ * @param cmd The command to run
  * @return (transfer full): The output
  */
 char *cmd_output(const char *cmd) {
