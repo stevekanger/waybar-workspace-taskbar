@@ -6,8 +6,6 @@
 #include <sys/prctl.h>
 #include <sys/unistd.h>
 
-static gboolean sig_initialized = FALSE;
-
 /**
  * Runs a command in its own process.
  *
@@ -17,11 +15,6 @@ static gboolean sig_initialized = FALSE;
 int cmd_fork_exec(const char *cmd) {
     if(!cmd || cmd[0] == '\0') {
         return -1;
-    }
-
-    if(!sig_initialized) {
-        signal(SIGCHLD, SIG_IGN);
-        sig_initialized = TRUE;
     }
 
     pid_t pid = fork();
