@@ -35,7 +35,7 @@ int cmd_fork_exec(const char *cmd) {
 
         setpgid(0, 0);
         prctl(PR_SET_PDEATHSIG, SIGTERM);
-        execl("/bin/sh", "sh", "-c", cmd, (char *)0);
+        execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
 
         perror("execl failed");
         _exit(127);
