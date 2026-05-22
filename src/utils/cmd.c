@@ -41,6 +41,7 @@ int cmd_fork_exec(const char *cmd) {
         _exit(127);
     }
 
+    g_child_watch_add(pid, (GChildWatchFunc)g_spawn_close_pid, NULL);
     return pid;
 }
 
