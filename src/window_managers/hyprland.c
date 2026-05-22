@@ -119,7 +119,8 @@ static int window_sort(gconstpointer a, gconstpointer b) {
 static WindowManagerData *data_fetcher() {
     WindowManagerData *wm_data = window_manager_data_create();
 
-    char *batch_json = cmd_output("hyprctl --batch \"monitors; clients\" -j");
+    char *batch_json =
+        cmd_run_output("hyprctl --batch \"monitors; clients\" -j");
 
     if(!batch_json) {
         window_manager_data_destroy(wm_data);

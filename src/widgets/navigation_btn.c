@@ -34,7 +34,7 @@ static void handle_click(gpointer user_data) {
         if(win_id) {
             g_autofree gchar *cmd =
                 str_replace(navigation_btn_on_click, "{id}", win_id);
-            cmd_fork_exec(cmd);
+            cmd_run_fork_exec(cmd);
         }
 
     } else {
@@ -43,7 +43,7 @@ static void handle_click(gpointer user_data) {
         if(win_id) {
             g_autofree gchar *cmd =
                 str_replace(navigation_btn_on_click, "{id}", win_id);
-            cmd_fork_exec(cmd);
+            cmd_run_fork_exec(cmd);
         }
     }
 }

@@ -159,7 +159,7 @@ static gboolean on_button_press(
 
         if(on_click) {
             g_autofree gchar *cmd = str_replace(on_click, "{id}", self->win_id);
-            cmd_fork_exec(cmd);
+            cmd_run_fork_exec(cmd);
         }
     }
 
@@ -170,7 +170,7 @@ static gboolean on_button_press(
         if(on_click_middle) {
             g_autofree gchar *cmd =
                 str_replace(on_click_middle, "{id}", self->win_id);
-            cmd_fork_exec(cmd);
+            cmd_run_fork_exec(cmd);
         }
     }
 
@@ -181,7 +181,7 @@ static gboolean on_button_press(
         if(on_click_right) {
             g_autofree gchar *cmd =
                 str_replace(on_click_right, "{id}", self->win_id);
-            cmd_fork_exec(cmd);
+            cmd_run_fork_exec(cmd);
         }
     }
 

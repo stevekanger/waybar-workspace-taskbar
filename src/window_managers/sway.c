@@ -232,7 +232,7 @@ static void walk_tree(
 static WindowManagerData *data_fetcher() {
     WindowManagerData *wm_data = window_manager_data_create();
 
-    char *json_str = cmd_output("swaymsg -t get_tree");
+    char *json_str = cmd_run_output("swaymsg -t get_tree");
     if(!json_str) {
         window_manager_data_destroy(wm_data);
         return NULL;

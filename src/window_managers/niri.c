@@ -115,7 +115,7 @@ static int window_sort(gconstpointer a, gconstpointer b) {
 static WindowManagerData *data_fetcher() {
     WindowManagerData *wm_data = window_manager_data_create();
 
-    char *ws_json = cmd_output("niri msg -j workspaces");
+    char *ws_json = cmd_run_output("niri msg -j workspaces");
     if(!ws_json) {
         window_manager_data_destroy(wm_data);
         return NULL;
@@ -158,7 +158,7 @@ static WindowManagerData *data_fetcher() {
         );
     }
 
-    char *win_json = cmd_output("niri msg -j windows");
+    char *win_json = cmd_run_output("niri msg -j windows");
     if(!win_json) {
         g_object_unref(ws_parser);
         g_free(ws_json);
