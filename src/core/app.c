@@ -120,7 +120,7 @@ WwtApp *wwt_app_new(
         return NULL;
     }
 
-    self->services = wwt_services_default(self->config);
+    self->services = wwt_services_init_default(wm_id);
     if(!self->services) {
         g_object_unref(self);
         g_critical("Waybar Workspace Taskbar: error initializing services");

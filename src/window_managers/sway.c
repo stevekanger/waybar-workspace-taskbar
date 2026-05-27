@@ -308,15 +308,12 @@ static WindowManagerData *data_fetcher() {
  *
  * @return (transfer full): The fully created window manager spec
  */
-WindowManagerSpec *window_manager_spec_create_sway() {
-    WindowManagerSpec *spec = g_malloc(sizeof(WindowManagerSpec));
-
-    spec->id = WM_ID_SWAY;
-    spec->events_constructor = events_constructor;
-    spec->events_destructor = events_destructor;
-    spec->events_reader = events_reader;
-    spec->events_validator = events_validator;
-    spec->data_fetcher = data_fetcher;
-
-    return spec;
+WindowManagerSpecFactory window_manager_spec_factory_sway() {
+    return (WindowManagerSpecFactory){
+        .events_constructor = events_constructor,
+        .events_destructor = events_destructor,
+        .events_reader = events_reader,
+        .events_validator = events_validator,
+        .data_fetcher = data_fetcher,
+    };
 }

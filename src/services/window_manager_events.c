@@ -1,6 +1,5 @@
 #include "window_manager_events.h"
 #include "glib.h"
-#include "window_manager_spec.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/poll.h>
@@ -10,16 +9,23 @@
 #define WM_EVENTS_DEBOUNCE_TIMEOUT 20
 #define WM_EVENTS_MSG_SIZE 4096
 
-struct _WindowManagerEvents {
+struct _WwtWindowManagerEvents {
+    GObject parent_instance;
+
     int timeout_id;
     int socket_fd;
     FILE *socket_file;
     struct pollfd poll_fd;
     WindowManagerEvent *event;
-    WindowManagerSpec *spec;
     WindowManagerEventsSubscription *subs[WM_EVENTS_MAX_CALlBACKS];
     int sub_count;
+    WindowManagerEventsConstructor events_constructor;
+    WindowManagerEventsDestructor events_destructor;
+    WindowManagerEventsValidator events_validator;
+    WindowManagerEventsReader events_reader;
 };
+
+G_DEFINE_TYPE(WwtWindowManagerEvents, wwt_window_manager_events, G_TYPE_OBJECT);
 
 /**
  * Sets non blocking on the socket file
@@ -72,7 +78,7 @@ static void window_manager_event_destroy(WindowManagerEvent *event) {
  * @param user_data The data to be passed (self) in this case
  */
 static gboolean events_debounce_fn(gpointer user_data) {
-    WindowManagerEvents *self = user_data;
+    WwtWindowManagerEvents *self = user_data;
 
     for(int i = 0; i < WM_EVENTS_MAX_CALlBACKS; ++i) {
         if(self->subs[i]) {
@@ -92,12 +98,7 @@ static gboolean events_debounce_fn(gpointer user_data) {
  * @return TRUE if no error else FALSE
  */
 static gboolean window_manager_events_poll(gpointer user_data) {
-    WindowManagerEvents *self = user_data;
-    WindowManagerSpec *spec = self->spec;
-    WindowManagerEventsReader events_reader =
-        window_manager_spec_get_events_reader(spec);
-    WindowManagerEventsValidator events_validator =
-        window_manager_spec_get_events_validator(spec);
+    WwtWindowManagerEvents *self = user_data;
 
     int ret = poll(&self->poll_fd, 1, 0);
 
@@ -110,8 +111,8 @@ static gboolean window_manager_events_poll(gpointer user_data) {
     }
 
     if(self->poll_fd.revents & POLLIN) {
-        while(events_reader(self->socket_file, self->event)) {
-            if(!events_validator(self->event)) {
+        while(self->events_reader(self->socket_file, self->event)) {
+            if(!self->events_validator(self->event)) {
                 continue;
             }
 
@@ -141,7 +142,7 @@ static gboolean window_manager_events_poll(gpointer user_data) {
  * failure
  */
 int window_manager_events_subscribe(
-    WindowManagerEvents *self,
+    WwtWindowManagerEvents *self,
     WindowManagerEventsCallback cb,
     gpointer user_data
 ) {
@@ -168,7 +169,10 @@ int window_manager_events_subscribe(
  * @param id This is the id passed on subscribing.
  * @return TRUE if successfully unsubscribed else FALSE
  */
-gboolean window_manager_events_unsubscribe(WindowManagerEvents *self, int id) {
+gboolean window_manager_events_unsubscribe(
+    WwtWindowManagerEvents *self,
+    int id
+) {
     if(!self || id < 0 || id >= WM_EVENTS_MAX_CALlBACKS) {
         return FALSE;
     }
@@ -188,13 +192,12 @@ gboolean window_manager_events_unsubscribe(WindowManagerEvents *self, int id) {
  * @pararm events
  * @param destructor The window manager specific events destructor
  */
-void window_manager_events_destroy(WindowManagerEvents *self) {
+static void finalize(GObject *obj) {
+    WwtWindowManagerEvents *self = WWT_WINDOW_MANAGER_EVENTS(obj);
+
     if(!self) {
         return;
     }
-
-    WindowManagerEventsDestructor destructor =
-        window_manager_spec_get_events_destructor(self->spec);
 
     for(int i = 0; i < WM_EVENTS_MAX_CALlBACKS; ++i) {
         if(self->subs[i]) {
@@ -202,27 +205,54 @@ void window_manager_events_destroy(WindowManagerEvents *self) {
         }
     }
 
-    destructor(self->poll_fd.fd, self->socket_file);
+    self->events_destructor(self->poll_fd.fd, self->socket_file);
 
     window_manager_event_destroy(self->event);
     g_source_remove(self->timeout_id);
-    g_free(self);
+
+    G_OBJECT_CLASS(wwt_window_manager_events_parent_class)->finalize(obj);
+}
+
+/**
+ * Initialize the instance
+ *
+ * @param self
+ */
+static void wwt_window_manager_events_init(WwtWindowManagerEvents *self) {
+}
+
+/**
+ * Class initializer
+ *
+ * @param klass the object class
+ */
+static void wwt_window_manager_events_class_init(
+    WwtWindowManagerEventsClass *klass
+) {
+    G_OBJECT_CLASS(klass)->finalize = finalize;
 }
 
 /**
  * Create the window manager events
  *
- * @param events_constructor Window manager specific socket connection
- * constructor
- * @param events_reader Window manager specific events reader
- * @return The fully created events instance
+ * @param spec The window manager spec
+ * @return (transfer full): The the events instance
  */
-WindowManagerEvents *window_manager_events_create(WindowManagerSpec *spec) {
-    WindowManagerEvents *self = g_malloc0(sizeof(WindowManagerEvents));
-    WindowManagerEventsConstructor events_constructor =
-        window_manager_spec_get_events_constructor(spec);
+WwtWindowManagerEvents *wwt_window_manager_events_new(
+    WindowManagerEventsConstructor events_constructor,
+    WindowManagerEventsDestructor events_destructor,
+    WindowManagerEventsReader events_reader,
+    WindowManagerEventsValidator events_validator
+) {
+    WwtWindowManagerEvents *self =
+        g_object_new(WWT_WINDOW_MANAGER_EVENTS_TYPE, NULL);
 
-    int fd = events_constructor();
+    self->events_constructor = events_constructor;
+    self->events_destructor = events_destructor;
+    self->events_reader = events_reader;
+    self->events_validator = events_validator;
+
+    int fd = self->events_constructor();
 
     self->socket_file = fdopen(fd, "r");
 
@@ -233,7 +263,6 @@ WindowManagerEvents *window_manager_events_create(WindowManagerSpec *spec) {
         return NULL;
     }
 
-    self->spec = spec;
     self->event = window_manager_event_create();
     self->poll_fd.fd = fd;
     self->poll_fd.events = POLLIN;

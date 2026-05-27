@@ -1,5 +1,6 @@
 #pragma once
 
+#include "window_manager_spec.h"
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
@@ -7,8 +8,17 @@ G_BEGIN_DECLS
 #define WM_EVENTS_MAX_CALlBACKS 8
 
 typedef struct _WindowManagerData WindowManagerData;
-typedef struct _WindowManagerEvents WindowManagerEvents;
-typedef struct WindowManagerSpec WindowManagerSpec;
+typedef struct _WwtWindowManagerEvents WwtWindowManagerEvents;
+
+#define WWT_WINDOW_MANAGER_EVENTS_TYPE (wwt_window_manager_events_get_type())
+
+G_DECLARE_FINAL_TYPE(
+    WwtWindowManagerEvents,
+    wwt_window_manager_events,
+    WWT,
+    WINDOW_MANAGER_EVENTS,
+    GObject
+);
 
 typedef struct WindowManagerEvent {
     char *msg;
@@ -27,15 +37,19 @@ typedef struct WindowManagerEventsSubscription {
     gpointer user_data;
 } WindowManagerEventsSubscription;
 
-WindowManagerEvents *window_manager_events_create(WindowManagerSpec *spec);
-void window_manager_events_destroy(WindowManagerEvents *events);
+WwtWindowManagerEvents *wwt_window_manager_events_new(
+    WindowManagerEventsConstructor events_constructor,
+    WindowManagerEventsDestructor events_destructor,
+    WindowManagerEventsReader events_reader,
+    WindowManagerEventsValidator events_validator
+);
 
 int window_manager_events_subscribe(
-    WindowManagerEvents *events,
+    WwtWindowManagerEvents *events,
     WindowManagerEventsCallback cb,
     gpointer user_data
 );
 
-int window_manager_events_unsubscribe(WindowManagerEvents *events, int pos);
+int window_manager_events_unsubscribe(WwtWindowManagerEvents *events, int pos);
 
 G_END_DECLS

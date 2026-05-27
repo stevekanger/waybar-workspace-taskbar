@@ -162,10 +162,10 @@ gchar *wwt_taskbar_get_focus_win_id(WwtTaskbar *self, int offset) {
 void wwt_taskbar_update_tabs(WwtTaskbar *self) {
     WwtServices *services = wwt_app_get_services(self->app);
     WwtConfig *config = wwt_app_get_config(self->app);
-    WindowManagerSpec *spec = wwt_services_get_window_manager_spec(services);
+    WwtWindowManagerSpec *spec = wwt_services_get_window_manager_spec(services);
 
     WindowManagerDataFetcher fetch_data =
-        window_manager_spec_get_data_fetcher(spec);
+        wwt_window_manager_spec_get_data_fetcher(spec);
 
     window_manager_data_destroy(self->wm_data);
     self->wm_data = fetch_data();
@@ -354,7 +354,7 @@ static void dispose(GObject *obj) {
     WwtServices *services = wwt_app_get_services(self->app);
 
     if(services) {
-        WindowManagerEvents *events =
+        WwtWindowManagerEvents *events =
             wwt_services_get_window_manager_events(services);
         window_manager_events_unsubscribe(events, self->events_subscription_id);
         self->events_subscription_id = -1;
@@ -414,7 +414,7 @@ WwtTaskbar *wwt_taskbar_new(WwtApp *app) {
         return NULL;
     }
 
-    WindowManagerEvents *wm_events =
+    WwtWindowManagerEvents *wm_events =
         wwt_services_get_window_manager_events(services);
 
     self->events_subscription_id =

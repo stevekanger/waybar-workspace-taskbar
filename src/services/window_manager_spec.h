@@ -7,6 +7,16 @@ G_BEGIN_DECLS
 typedef struct _WindowManagerData WindowManagerData;
 typedef struct WindowManagerEvent WindowManagerEvent;
 
+#define WWT_WINDOW_MANAGER_SPEC_TYPE (wwt_window_manager_spec_get_type())
+
+G_DECLARE_FINAL_TYPE(
+    WwtWindowManagerSpec,
+    wwt_window_manager_spec,
+    WWT,
+    WINDOW_MANAGER_SPEC,
+    GObject
+);
+
 typedef enum WindowManagerId {
     WM_ID_UNSUPPORTED,
     WM_ID_SWAY,
@@ -24,32 +34,30 @@ typedef WindowManagerData *(*WindowManagerDataFetcher)();
 typedef gboolean (*WindowManagerClickHandler)(const char *id);
 typedef gboolean (*WindowManagerEventsValidator)(WindowManagerEvent *event);
 
-typedef struct WindowManagerSpec {
-    WindowManagerId id;
+typedef struct {
     WindowManagerEventsConstructor events_constructor;
     WindowManagerEventsDestructor events_destructor;
     WindowManagerEventsReader events_reader;
     WindowManagerEventsValidator events_validator;
     WindowManagerDataFetcher data_fetcher;
-} WindowManagerSpec;
+} WindowManagerSpecFactory;
 
-WindowManagerEventsConstructor window_manager_spec_get_events_constructor(
-    WindowManagerSpec *self
+WindowManagerEventsConstructor wwt_window_manager_spec_get_events_constructor(
+    WwtWindowManagerSpec *self
 );
-WindowManagerEventsDestructor window_manager_spec_get_events_destructor(
-    WindowManagerSpec *self
+WindowManagerEventsDestructor wwt_window_manager_spec_get_events_destructor(
+    WwtWindowManagerSpec *self
 );
-WindowManagerEventsReader window_manager_spec_get_events_reader(
-    WindowManagerSpec *self
+WindowManagerEventsReader wwt_window_manager_spec_get_events_reader(
+    WwtWindowManagerSpec *self
 );
-WindowManagerEventsValidator window_manager_spec_get_events_validator(
-    WindowManagerSpec *self
+WindowManagerEventsValidator wwt_window_manager_spec_get_events_validator(
+    WwtWindowManagerSpec *self
 );
-WindowManagerDataFetcher window_manager_spec_get_data_fetcher(
-    WindowManagerSpec *self
+WindowManagerDataFetcher wwt_window_manager_spec_get_data_fetcher(
+    WwtWindowManagerSpec *self
 );
 
-WindowManagerSpec *window_manager_spec_create(WindowManagerId wm_id);
-void window_manager_spec_destroy(WindowManagerSpec *spec);
+WwtWindowManagerSpec *wwt_window_manager_spec_new(WindowManagerId wm_id);
 
 G_END_DECLS

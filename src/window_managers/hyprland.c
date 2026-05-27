@@ -212,19 +212,16 @@ static WindowManagerData *data_fetcher() {
 }
 
 /**
- * Create the window manager spec
+ * Creates the window manager spec
  *
- * @return (transfer full): The fully created window manager spec
+ * @return The spec factory
  */
-WindowManagerSpec *window_manager_spec_create_hyprland() {
-    WindowManagerSpec *spec = g_malloc(sizeof(WindowManagerSpec));
-
-    spec->id = WM_ID_HYPRLAND;
-    spec->events_constructor = events_constructor;
-    spec->events_destructor = events_destructor;
-    spec->events_reader = events_reader;
-    spec->events_validator = events_validator;
-    spec->data_fetcher = data_fetcher;
-
-    return spec;
+WindowManagerSpecFactory window_manager_spec_factory_hyprland() {
+    return (WindowManagerSpecFactory){
+        .events_constructor = events_constructor,
+        .events_destructor = events_destructor,
+        .events_reader = events_reader,
+        .events_validator = events_validator,
+        .data_fetcher = data_fetcher,
+    };
 }

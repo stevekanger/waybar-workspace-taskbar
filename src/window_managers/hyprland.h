@@ -4,6 +4,6 @@
 
 G_BEGIN_DECLS
 
-WindowManagerSpec *window_manager_spec_create_hyprland();
+WindowManagerSpecFactory window_manager_spec_factory_hyprland();
 
 G_END_DECLS

@@ -3,14 +3,37 @@
 #include "window_managers/niri.h"
 #include "window_managers/sway.h"
 
+struct _WwtWindowManagerSpec {
+    GObject parent_instance;
+
+    WindowManagerId id;
+    WindowManagerEventsConstructor events_constructor;
+    WindowManagerEventsDestructor events_destructor;
+    WindowManagerEventsReader events_reader;
+    WindowManagerEventsValidator events_validator;
+    WindowManagerDataFetcher data_fetcher;
+};
+
+G_DEFINE_TYPE(WwtWindowManagerSpec, wwt_window_manager_spec, G_TYPE_OBJECT);
+
+/**
+ * Gets the window manager id
+ *
+ * @param self
+ * @return The id
+ */
+WindowManagerId wwt_window_manager_spec_get_id(WwtWindowManagerSpec *self) {
+    return self->id;
+}
+
 /**
  * Gets the events_constructor
  *
  * @param self
  * @return The events_constructor
  */
-WindowManagerEventsConstructor window_manager_spec_get_events_constructor(
-    WindowManagerSpec *self
+WindowManagerEventsConstructor wwt_window_manager_spec_get_events_constructor(
+    WwtWindowManagerSpec *self
 ) {
     return self->events_constructor;
 }
@@ -21,8 +44,8 @@ WindowManagerEventsConstructor window_manager_spec_get_events_constructor(
  * @param self
  * @return The events_destructor
  */
-WindowManagerEventsDestructor window_manager_spec_get_events_destructor(
-    WindowManagerSpec *self
+WindowManagerEventsDestructor wwt_window_manager_spec_get_events_destructor(
+    WwtWindowManagerSpec *self
 ) {
     return self->events_destructor;
 }
@@ -33,8 +56,8 @@ WindowManagerEventsDestructor window_manager_spec_get_events_destructor(
  * @param self
  * @return The events_reader
  */
-WindowManagerEventsReader window_manager_spec_get_events_reader(
-    WindowManagerSpec *self
+WindowManagerEventsReader wwt_window_manager_spec_get_events_reader(
+    WwtWindowManagerSpec *self
 ) {
     return self->events_reader;
 }
@@ -45,8 +68,8 @@ WindowManagerEventsReader window_manager_spec_get_events_reader(
  * @param self
  * @return The events_validator
  */
-WindowManagerEventsValidator window_manager_spec_get_events_validator(
-    WindowManagerSpec *self
+WindowManagerEventsValidator wwt_window_manager_spec_get_events_validator(
+    WwtWindowManagerSpec *self
 ) {
     return self->events_validator;
 }
@@ -57,39 +80,58 @@ WindowManagerEventsValidator window_manager_spec_get_events_validator(
  * @param self
  * @return The data_fetcher
  */
-WindowManagerDataFetcher window_manager_spec_get_data_fetcher(
-    WindowManagerSpec *self
+WindowManagerDataFetcher wwt_window_manager_spec_get_data_fetcher(
+    WwtWindowManagerSpec *self
 ) {
     return self->data_fetcher;
 }
 
 /**
- * Destroys the window manager spec
+ * Initialize the instance
  *
  * @param self
  */
-void window_manager_spec_destroy(WindowManagerSpec *self) {
-    g_free(self);
+static void wwt_window_manager_spec_init(WwtWindowManagerSpec *self) {
+}
+
+/**
+ * Class initializer
+ *
+ * @param klass the object class
+ */
+static void wwt_window_manager_spec_class_init(
+    WwtWindowManagerSpecClass *klass
+) {
 }
 
 /**
  * Creates the window manager spec
  *
- * @param app The app instance
- * @return The fully created window manager spec
+ * @param wm_id The window manager id
+ * @return (transfer full) The window manager spec instance
  */
-WindowManagerSpec *window_manager_spec_create(WindowManagerId wm_id) {
-    if(wm_id == WM_ID_NIRI) {
-        return window_manager_spec_create_niri();
+WwtWindowManagerSpec *wwt_window_manager_spec_new(WindowManagerId id) {
+    WwtWindowManagerSpec *self =
+        g_object_new(WWT_WINDOW_MANAGER_SPEC_TYPE, NULL);
+    self->id = id;
+
+    WindowManagerSpecFactory factory;
+    if(id == WM_ID_NIRI) {
+        factory = window_manager_spec_factory_niri();
+    } else if(id == WM_ID_HYPRLAND) {
+        factory = window_manager_spec_factory_hyprland();
+    } else if(id == WM_ID_SWAY) {
+        factory = window_manager_spec_factory_sway();
+    } else {
+        g_object_unref(self);
+        return NULL;
     }
 
-    if(wm_id == WM_ID_HYPRLAND) {
-        return window_manager_spec_create_hyprland();
-    }
+    self->events_validator = factory.events_validator;
+    self->events_reader = factory.events_reader;
+    self->events_constructor = factory.events_constructor;
+    self->events_destructor = factory.events_destructor;
+    self->data_fetcher = factory.data_fetcher;
 
-    if(wm_id == WM_ID_SWAY) {
-        return window_manager_spec_create_sway();
-    }
-
-    return NULL;
+    return self;
 }
