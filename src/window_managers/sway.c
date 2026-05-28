@@ -1,8 +1,7 @@
 #include "sway.h"
-#include "core/window_manager_data.h"
 #include "glib.h"
-#include "services/window_manager_events.h"
-#include "services/window_manager_spec.h"
+#include "services/window_manager/data.h"
+#include "services/window_manager/events.h"
 #include "utils/cmd.h"
 #include "utils/common.h"
 #include <stdio.h>
@@ -129,8 +128,8 @@ static gboolean events_validator(WindowManagerEvent *event) {
  * @return < 0 if should swap
  */
 static int window_sort(gconstpointer a, gconstpointer b) {
-    const WindowManagerWindow *cur = *(const WindowManagerWindow **)a;
-    const WindowManagerWindow *next = *(const WindowManagerWindow **)b;
+    const WindowManagerDataWindow *cur = *(const WindowManagerDataWindow **)a;
+    const WindowManagerDataWindow *next = *(const WindowManagerDataWindow **)b;
 
     return cur->floating - next->floating;
 }
@@ -143,7 +142,7 @@ static int window_sort(gconstpointer a, gconstpointer b) {
  * @param workspace_name The current active workspace name
  */
 static void walk_tree(
-    WindowManagerData *wm_data,
+    WwtWindowManagerData *wm_data,
     JsonObject *node,
     int workspace_id
 ) {
@@ -181,7 +180,7 @@ static void walk_tree(
             y = json_object_get_int_member(window_rect, "y");
         }
 
-        window_manager_data_window_create(
+        wwt_window_manager_data_window_add(
             wm_data,
             id_str,
             name,
@@ -196,7 +195,10 @@ static void walk_tree(
         );
 
         if(focused) {
-            window_manager_data_set_focused_workspace(wm_data, workspace_id);
+            wwt_window_manager_data_set_focused_workspace(
+                wm_data,
+                workspace_id
+            );
         }
     }
 
@@ -230,27 +232,22 @@ static void walk_tree(
  * @return (transfer full): Populated window manager data or NULL on error (free
  * with window_manager_data_destroy)
  */
-static WindowManagerData *data_fetcher() {
-    WindowManagerData *wm_data = window_manager_data_create();
-
+static void data_fetcher(WwtWindowManagerData *wm_data) {
     g_autofree char *json_str = cmd_run_output("swaymsg -t get_tree");
     if(!json_str) {
-        window_manager_data_destroy(wm_data);
-        return NULL;
+        return;
     }
 
     g_autoptr(JsonParser) parser = create_json_parser(json_str);
     if(!parser) {
-        window_manager_data_destroy(wm_data);
-        return NULL;
+        return;
     }
 
     JsonNode *root = json_parser_get_root(parser);
     JsonObject *root_obj = json_node_get_object(root);
     JsonArray *outputs = json_object_get_array_member(root_obj, "nodes");
     if(!outputs) {
-        window_manager_data_destroy(wm_data);
-        return NULL;
+        return;
     }
 
     guint outputs_len = json_array_get_length(outputs);
@@ -287,7 +284,7 @@ static WindowManagerData *data_fetcher() {
             gint64 workspace_id = json_object_get_int_member(ws, "id");
             gboolean focused = json_object_get_boolean_member(ws, "focused");
 
-            window_manager_data_workspace_create(
+            wwt_window_manager_data_workspace_add(
                 wm_data,
                 workspace_id,
                 focused,
@@ -298,9 +295,7 @@ static WindowManagerData *data_fetcher() {
         }
     }
 
-    window_manager_data_sort_windows(wm_data, window_sort);
-
-    return wm_data;
+    wwt_window_manager_data_sort_windows(wm_data, window_sort);
 }
 
 /**

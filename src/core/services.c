@@ -1,8 +1,7 @@
 #include "services.h"
 #include "config.h"
 #include "services/app_icons.h"
-#include "services/window_manager_events.h"
-#include "services/window_manager_spec.h"
+#include "services/window_manager/window_manager.h"
 #include <assert.h>
 
 typedef enum InitStatus {
@@ -14,8 +13,7 @@ typedef enum InitStatus {
 struct _WwtServices {
     GObject parent_instance;
 
-    WwtWindowManagerSpec *window_manager_spec;
-    WwtWindowManagerEvents *window_manager_events;
+    WwtWindowManager *window_manager;
     WwtAppIcons *app_icons;
 };
 
@@ -35,25 +33,35 @@ WwtAppIcons *wwt_services_get_app_icons(WwtServices *self) {
 }
 
 /**
- * Gets the window manager events
+ * Gets the window manager
  *
  * @param self
- * @return The window events
+ * @return The window
  */
-WwtWindowManagerEvents *wwt_services_get_window_manager_events(
-    WwtServices *self
-) {
-    return self->window_manager_events;
+WwtWindowManager *wwt_services_get_window_manager(WwtServices *self) {
+    return self->window_manager;
 }
 
 /**
- * Gets the window manager events
+ * Initializes the services
  *
  * @param self
- * @return The window events
+ * @param wm_id
+ * @return TRUE if all services successfully intialized else FALSE
  */
-WwtWindowManagerSpec *wwt_services_get_window_manager_spec(WwtServices *self) {
-    return self->window_manager_spec;
+static gboolean compose(WwtServices *self, WindowManagerId wm_id) {
+    self->window_manager = wwt_window_manager_new(wm_id);
+    if(!self->window_manager) {
+        return FALSE;
+    }
+
+    // Initialize App icons
+    self->app_icons = wwt_app_icons_new();
+    if(!self->app_icons) {
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /**
@@ -64,8 +72,7 @@ WwtWindowManagerSpec *wwt_services_get_window_manager_spec(WwtServices *self) {
 static void dispose(GObject *obj) {
     WwtServices *self = WWT_SERVICES(obj);
 
-    g_clear_object(&self->window_manager_events);
-    g_clear_object(&self->window_manager_spec);
+    g_clear_object(&self->window_manager);
     g_clear_object(&self->app_icons);
 
     if(services_instance) {
@@ -109,7 +116,7 @@ static void wwt_services_class_init(WwtServicesClass *klass) {
  * @return The services instance
  */
 WwtServices *wwt_services_get_default() {
-    assert(services_instance != NULL);
+    assert(services_instance != NULL && init_status == INIT_STATUS_SUCCESS);
 
     return services_instance;
 }
@@ -132,32 +139,7 @@ WwtServices *wwt_services_init_default(WindowManagerId wm_id) {
 
     WwtServices *self = g_object_new(WWT_SERVICES_TYPE, NULL);
 
-    // Initialize the spec first
-    self->window_manager_spec = wwt_window_manager_spec_new(wm_id);
-    if(!self->window_manager_spec) {
-        init_status = INIT_STATUS_FAILED;
-        g_object_unref(self);
-        return NULL;
-    }
-
-    self->window_manager_events = wwt_window_manager_events_new(
-        wwt_window_manager_spec_get_events_constructor(
-            self->window_manager_spec
-        ),
-        wwt_window_manager_spec_get_events_destructor(
-            self->window_manager_spec
-        ),
-        wwt_window_manager_spec_get_events_reader(self->window_manager_spec),
-        wwt_window_manager_spec_get_events_validator(self->window_manager_spec)
-    );
-    if(!self->window_manager_events) {
-        init_status = INIT_STATUS_FAILED;
-        g_object_unref(self);
-        return NULL;
-    }
-
-    self->app_icons = wwt_app_icons_new();
-    if(!self->app_icons) {
+    if(!compose(self, wm_id)) {
         init_status = INIT_STATUS_FAILED;
         g_object_unref(self);
         return NULL;

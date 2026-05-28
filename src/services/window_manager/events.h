@@ -1,6 +1,6 @@
 #pragma once
 
-#include "window_manager_spec.h"
+#include "window_manager.h"
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
@@ -27,29 +27,13 @@ typedef struct WindowManagerEvent {
     gint debounce_timeout_id;
 } WindowManagerEvent;
 
-typedef void (*WindowManagerEventsCallback)(
-    WindowManagerEvent *event,
-    gpointer user_data
-);
-
-typedef struct WindowManagerEventsSubscription {
-    WindowManagerEventsCallback cb;
-    gpointer user_data;
-} WindowManagerEventsSubscription;
-
 WwtWindowManagerEvents *wwt_window_manager_events_new(
     WindowManagerEventsConstructor events_constructor,
     WindowManagerEventsDestructor events_destructor,
     WindowManagerEventsReader events_reader,
-    WindowManagerEventsValidator events_validator
+    WindowManagerEventsValidator events_validator,
+    WindowManagerEventsCallback events_callback,
+    gpointer events_callback_user_data
 );
-
-int window_manager_events_subscribe(
-    WwtWindowManagerEvents *events,
-    WindowManagerEventsCallback cb,
-    gpointer user_data
-);
-
-int window_manager_events_unsubscribe(WwtWindowManagerEvents *events, int pos);
 
 G_END_DECLS

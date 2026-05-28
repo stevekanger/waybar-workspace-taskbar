@@ -4,16 +4,18 @@
 
 G_BEGIN_DECLS
 
-typedef struct _WindowManagerData WindowManagerData;
+typedef struct _WwtWindowManagerEvents WwtWindowManagerEvents;
+typedef struct _WwtWindowManagerSubscriptions WwtWindowManagerSubscriptions;
+typedef struct _WwtWindowManagerData WwtWindowManagerData;
 typedef struct WindowManagerEvent WindowManagerEvent;
 
-#define WWT_WINDOW_MANAGER_SPEC_TYPE (wwt_window_manager_spec_get_type())
+#define WWT_WINDOW_MANAGER_TYPE (wwt_window_manager_get_type())
 
 G_DECLARE_FINAL_TYPE(
-    WwtWindowManagerSpec,
-    wwt_window_manager_spec,
+    WwtWindowManager,
+    wwt_window_manager,
     WWT,
-    WINDOW_MANAGER_SPEC,
+    WINDOW_MANAGER,
     GObject
 );
 
@@ -24,13 +26,14 @@ typedef enum WindowManagerId {
     WM_ID_HYPRLAND
 } WindowManagerId;
 
+typedef void (*WindowManagerEventsCallback)(gpointer user_data);
 typedef int (*WindowManagerEventsConstructor)();
 typedef void (*WindowManagerEventsDestructor)(int fd, FILE *socket_file);
 typedef gboolean (*WindowManagerEventsReader)(
     FILE *socket_file,
     WindowManagerEvent *event
 );
-typedef WindowManagerData *(*WindowManagerDataFetcher)();
+typedef void (*WindowManagerDataFetcher)(WwtWindowManagerData *wm_data);
 typedef gboolean (*WindowManagerClickHandler)(const char *id);
 typedef gboolean (*WindowManagerEventsValidator)(WindowManagerEvent *event);
 
@@ -42,22 +45,11 @@ typedef struct {
     WindowManagerDataFetcher data_fetcher;
 } WindowManagerSpecFactory;
 
-WindowManagerEventsConstructor wwt_window_manager_spec_get_events_constructor(
-    WwtWindowManagerSpec *self
+WwtWindowManager *wwt_window_manager_new(WindowManagerId);
+WindowManagerId wwt_window_manager_get_id(WwtWindowManager *self);
+WwtWindowManagerSubscriptions *wwt_window_manager_get_subsciptions(
+    WwtWindowManager *self
 );
-WindowManagerEventsDestructor wwt_window_manager_spec_get_events_destructor(
-    WwtWindowManagerSpec *self
-);
-WindowManagerEventsReader wwt_window_manager_spec_get_events_reader(
-    WwtWindowManagerSpec *self
-);
-WindowManagerEventsValidator wwt_window_manager_spec_get_events_validator(
-    WwtWindowManagerSpec *self
-);
-WindowManagerDataFetcher wwt_window_manager_spec_get_data_fetcher(
-    WwtWindowManagerSpec *self
-);
-
-WwtWindowManagerSpec *wwt_window_manager_spec_new(WindowManagerId wm_id);
+WwtWindowManagerData *wwt_window_manager_get_data(WwtWindowManager *self);
 
 G_END_DECLS

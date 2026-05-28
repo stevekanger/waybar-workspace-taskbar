@@ -1,7 +1,7 @@
 #include "app.h"
 #include "config.h"
 #include "services.h"
-#include "services/window_manager_spec.h"
+#include "services/window_manager/window_manager.h"
 #include "wbcffi.h"
 #include "widgets/taskbar.h"
 
