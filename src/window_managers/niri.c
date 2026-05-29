@@ -62,7 +62,7 @@ static gboolean events_reader(FILE *socket_file, WindowManagerEvent *event) {
  * @return TRUE if should fire events else FALSE
  */
 static gboolean events_validator(WindowManagerEvent *event) {
-    JsonParser *parser = create_json_parser(event->msg);
+    g_autoptr(JsonParser) parser = create_json_parser(event->msg);
     JsonNode *root = json_parser_get_root(parser);
     JsonObject *root_obj = json_node_get_object(root);
 
@@ -75,11 +75,9 @@ static gboolean events_validator(WindowManagerEvent *event) {
         json_object_has_member(root_obj, "WorkspaceActiveWindowChanged") ||
         json_object_has_member(root_obj, "WindowUrgencyChanged") ||
         json_object_has_member(root_obj, "OverviewOpenedOrClosed")) {
-        g_object_unref(parser);
         return TRUE;
     }
 
-    g_object_unref(parser);
     return FALSE;
 }
 
