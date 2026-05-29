@@ -31,6 +31,10 @@ static void handle_click(gpointer user_data) {
     const char *navigation_btn_on_click =
         wwt_config_get_navigation_btn_on_click(config);
 
+    if(!navigation_btn_on_click) {
+        return;
+    }
+
     WwtServices *services = wwt_services_get_default();
     WwtWindowManager *wm = wwt_services_get_window_manager(services);
     WwtWindowManagerData *wm_data = wwt_window_manager_get_data(wm);
