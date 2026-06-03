@@ -1,5 +1,6 @@
 #include "cmd.h"
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,17 +36,22 @@ char *cmd_run_output(const char *cmd) {
 
     size_t chunk_size = 4096;
     size_t buf_size = chunk_size;
-    char *buf = malloc(buf_size + 1);
     size_t bytes_total = 0;
     size_t bytes_read = 0;
 
+    char *buf = g_malloc(buf_size + 1);
+    if(!buf) {
+        pclose(f);
+        return NULL;
+    }
+
     while(1) {
-        if(bytes_total + chunk_size >= buf_size) {
+        if(bytes_total + chunk_size > buf_size) {
             buf_size *= 2;
-            char *tmp = realloc(buf, buf_size + 1);
+            char *tmp = g_realloc(buf, buf_size + 1);
 
             if(!tmp) {
-                free(buf);
+                g_free(buf);
                 pclose(f);
                 return NULL;
             }
