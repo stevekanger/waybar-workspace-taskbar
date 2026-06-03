@@ -27,31 +27,43 @@ int cmd_run(const char *cmd) {
  * @return (transfer full): The output string
  */
 char *cmd_run_output(const char *cmd) {
-    FILE *fp = popen(cmd, "r");
+    FILE *f = popen(cmd, "r");
 
-    if(!fp) {
+    if(!f) {
         return NULL;
     }
 
-    size_t size = 4096;
-    char *buf = g_malloc(size);
-    size_t len = 0;
-    char tmp[256];
+    size_t chunk_size = 4096;
+    size_t buf_size = chunk_size;
+    char *buf = malloc(buf_size + 1);
+    size_t bytes_total = 0;
+    size_t bytes_read = 0;
 
-    while(fgets(tmp, sizeof(tmp), fp)) {
-        size_t chunk = strlen(tmp);
+    while(1) {
+        if(bytes_total + chunk_size >= buf_size) {
+            buf_size *= 2;
+            char *tmp = realloc(buf, buf_size + 1);
 
-        if(len + chunk + 1 > size) {
-            size *= 2;
-            buf = g_realloc(buf, size);
+            if(!tmp) {
+                free(buf);
+                pclose(f);
+                return NULL;
+            }
+
+            buf = tmp;
         }
 
-        memcpy(buf + len, tmp, chunk);
-        len += chunk;
+        bytes_read = fread(buf + bytes_total, 1, chunk_size, f);
+
+        if(bytes_read <= 0) {
+            break;
+        }
+
+        bytes_total += bytes_read;
     }
 
-    buf[len] = '\0';
-    pclose(fp);
+    buf[bytes_total] = '\0';
+    pclose(f);
 
     return buf;
 }
