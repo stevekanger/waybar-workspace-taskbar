@@ -1,15 +1,73 @@
 #include "sway.h"
-#include "glib.h"
 #include "services/window_manager/data.h"
 #include "services/window_manager/events.h"
-#include "utils/cmd.h"
 #include "utils/common.h"
 #include <stdio.h>
 #include <string.h>
 
+// Sway header
 #define SWAY_MAGIC "i3-ipc"
-#define SWAY_MAGIC_LEN 6
-#define SWAY_HEADER_LEN (SWAY_MAGIC_LEN + 8)
+#define SWAY_HEADER_MAGIC_LEN 6
+#define SWAY_HEADER_PAYLOAD_LEN 4
+#define SWAY_HEADER_MSG_LEN 4
+#define SWAY_HEADER_LEN \
+    (SWAY_HEADER_MAGIC_LEN + SWAY_HEADER_PAYLOAD_LEN + SWAY_HEADER_MSG_LEN)
+
+// Sway message types
+#define SWAY_MSG_TYPE_SUBSCRIRBE 2
+#define SWAY_MSG_TYPE_GET_TREE 4
+
+/**
+ * Gets the sway socket path
+ *
+ * @return The socket path
+ */
+static char *get_socket_path() {
+    return getenv("SWAYSOCK");
+}
+
+static char *ipc_fetch(uint32_t message_type, const char *cmd) {
+    uint32_t payload_len = cmd ? strlen(cmd) : 0;
+
+    const char *socket_path = get_socket_path();
+
+    if(!socket_path) {
+        return NULL;
+    }
+
+    int fd = socket_connect(socket_path);
+
+    write(fd, SWAY_MAGIC, SWAY_HEADER_MAGIC_LEN);
+    write(fd, &payload_len, SWAY_HEADER_PAYLOAD_LEN);
+    write(fd, &message_type, SWAY_HEADER_MSG_LEN);
+
+    char output_magic[SWAY_HEADER_MAGIC_LEN];
+    uint32_t output_payload_len;
+    uint32_t output_msg_type;
+
+    read(fd, output_magic, SWAY_HEADER_MAGIC_LEN);
+    read(fd, &output_payload_len, SWAY_HEADER_PAYLOAD_LEN);
+    read(fd, &output_msg_type, SWAY_HEADER_MSG_LEN);
+
+    char *buf = malloc(output_payload_len + 1);
+    size_t bytes_read = 0;
+
+    while(bytes_read < output_payload_len) {
+        ssize_t n = read(fd, buf + bytes_read, output_payload_len - bytes_read);
+
+        if(n <= 0) {
+            break;
+        }
+
+        bytes_read += n;
+    }
+
+    buf[bytes_read] = '\0';
+
+    close(fd);
+
+    return buf;
+}
 
 /**
  * Connect and initialize the socket connection
@@ -17,7 +75,7 @@
  * @return The file descriptor
  */
 static int events_constructor() {
-    const char *socket_path = getenv("SWAYSOCK");
+    const char *socket_path = get_socket_path();
 
     if(!socket_path) {
         return -1;
@@ -30,16 +88,15 @@ static int events_constructor() {
     }
 
     const char *events_json = "[\"workspace\", \"window\"]";
-
     uint32_t payload_len = strlen(events_json);
-    uint32_t msg_type = 2; // IPC_SUBSCRIBE
+    uint32_t msg_type = SWAY_MSG_TYPE_SUBSCRIRBE;
 
-    char header[SWAY_HEADER_LEN];
-    memcpy(header, SWAY_MAGIC, SWAY_MAGIC_LEN);
-    memcpy(header + SWAY_MAGIC_LEN, &payload_len, 4);
-    memcpy(header + SWAY_MAGIC_LEN + 4, &msg_type, 4);
+    // header
+    write(fd, SWAY_MAGIC, SWAY_HEADER_MAGIC_LEN);
+    write(fd, &payload_len, SWAY_HEADER_PAYLOAD_LEN);
+    write(fd, &msg_type, SWAY_HEADER_MSG_LEN);
 
-    write(fd, header, SWAY_HEADER_LEN);
+    // command
     write(fd, events_json, payload_len);
 
     return fd;
@@ -70,13 +127,13 @@ static gboolean events_reader(FILE *socket_file, WindowManagerEvent *event) {
         return FALSE;
     }
 
-    if(memcmp(header, SWAY_MAGIC, SWAY_MAGIC_LEN) != 0) {
+    if(memcmp(header, SWAY_MAGIC, SWAY_HEADER_MAGIC_LEN) != 0) {
         return FALSE;
     }
 
     uint32_t payload_len, msg_type;
-    memcpy(&payload_len, header + SWAY_MAGIC_LEN, 4);
-    memcpy(&msg_type, header + SWAY_MAGIC_LEN + 4, 4);
+    memcpy(&payload_len, header + SWAY_HEADER_MAGIC_LEN, 4);
+    memcpy(&msg_type, header + SWAY_HEADER_MAGIC_LEN + 4, 4);
 
     if((size_t)payload_len + 1 > event->msg_size) {
         event->msg = realloc(event->msg, payload_len + 1);
@@ -231,7 +288,7 @@ static void walk_tree(
  * with window_manager_data_destroy)
  */
 static void data_fetcher(WwtWindowManagerData *wm_data) {
-    g_autofree char *json_str = cmd_run_output("swaymsg -t get_tree");
+    g_autofree char *json_str = ipc_fetch(SWAY_MSG_TYPE_GET_TREE, NULL);
     if(!json_str) {
         return;
     }
