@@ -55,14 +55,26 @@ JsonParser *create_json_parser(const char *json_str) {
 /**
  * Gets the current timestamp in ms
  *
+ * @param unit The timestamp unit (S: seconds, MS: miliseconds, US:
+ * microseconds, NS: nanoseconds)
  * @return The timestamp in ms
  */
-long long get_timestamp() {
+long long get_timestamp(TimestampUnit unit) {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    long long ms = (long long)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 
-    return ms;
+    switch(unit) {
+        case TIMESTAMP_S:
+            return (long long)ts.tv_sec;
+        case TIMESTAMP_MS:
+            return (long long)ts.tv_sec * 1000LL + ts.tv_nsec / 1000000;
+        case TIMESTAMP_US:
+            return (long long)ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+        case TIMESTAMP_NS:
+            return (long long)ts.tv_sec * 1000000000LL + ts.tv_nsec;
+        default:
+            return (long long)ts.tv_sec * 1000LL + ts.tv_nsec / 1000000;
+    }
 }
 
 /**
