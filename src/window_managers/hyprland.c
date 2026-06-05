@@ -2,6 +2,7 @@
 #include "services/window_manager/data.h"
 #include "services/window_manager/events.h"
 #include "utils/common.h"
+#include "utils/socket.h"
 #include <stdio.h>
 #include <sys/socket.h>
 
@@ -63,40 +64,10 @@ static char *ipc_fetch(const char *cmd) {
 
     write(fd, cmd, strlen(cmd));
     shutdown(fd, SHUT_WR);
-
-    size_t chunk_size = 4096;
-    size_t buf_size = chunk_size;
-    char *buf = malloc(buf_size + 1);
-    size_t bytes_total = 0;
-    ssize_t bytes_read;
-
-    while(1) {
-        if(bytes_total + chunk_size > buf_size) {
-            buf_size *= 2;
-            char *tmp = realloc(buf, buf_size + 1);
-
-            if(!tmp) {
-                free(buf);
-                close(fd);
-                return NULL;
-            }
-
-            buf = tmp;
-        }
-
-        bytes_read = read(fd, buf + bytes_total, buf_size - bytes_total);
-
-        if(bytes_read <= 0) {
-            break;
-        }
-
-        bytes_total += bytes_read;
-    }
-
-    buf[bytes_total] = '\0';
+    char *data = socket_read(fd, SOCKET_READ_MAX);
     close(fd);
 
-    return buf;
+    return data;
 }
 
 /**

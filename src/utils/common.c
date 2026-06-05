@@ -1,34 +1,5 @@
 #include "common.h"
-#include <sys/socket.h>
-#include <sys/un.h>
 #include <time.h>
-
-/**
- * Connect to a socket
- *
- * @param socket_path The address path to connect to
- * @return The socket file descriptor, or -1 on failure
- */
-int socket_connect(const char *socket_path) {
-    int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-
-    if(fd < 0) {
-        perror("socket");
-        return -1;
-    }
-
-    struct sockaddr_un addr = {0};
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path) - 1);
-
-    if(connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        perror("connect");
-        close(fd);
-        return -1;
-    }
-
-    return fd;
-}
 
 /**
  * Creates the json parser

@@ -2,6 +2,7 @@
 #include "services/window_manager/data.h"
 #include "services/window_manager/events.h"
 #include "utils/common.h"
+#include "utils/socket.h"
 #include <stdio.h>
 #include <sys/socket.h>
 
@@ -32,15 +33,10 @@ static char *ipc_fetch(const char *cmd) {
     write(fd, "\n", 1);
     shutdown(fd, SHUT_WR);
 
-    FILE *f = fdopen(fd, "r");
+    char *data = socket_read(fd, SOCKET_READ_MAX);
+    close(fd);
 
-    char *buf = NULL;
-    size_t size = 0;
-    getline(&buf, &size, f);
-
-    fclose(f);
-
-    return buf;
+    return data;
 }
 
 /**
