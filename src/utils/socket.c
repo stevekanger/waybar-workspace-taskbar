@@ -91,7 +91,7 @@ char *socket_read(int fd, size_t max) {
  *
  * @param fd The socket file descriptor
  * @param len The amount of bytes to read
- * @return A string of n chars read from the socket
+ * @return (transfer full): A string of n chars read from the socket
  */
 char *socket_read_len(int fd, size_t len) {
     char *buf = g_malloc(len + 1);
