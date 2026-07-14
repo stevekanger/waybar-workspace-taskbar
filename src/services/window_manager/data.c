@@ -105,7 +105,7 @@ WindowManagerDataWindow *wwt_window_manager_data_get_window_at_idx(
 ) {
     WindowManagerDataWorkspace *ws = get_workspace_on_output(self, output);
 
-    if(!ws) {
+    if(!ws || !ws->windows || ws->windows->len == 0) {
         return NULL;
     }
 
