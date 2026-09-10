@@ -258,7 +258,7 @@ static void data_fetcher(WwtWindowManagerData *wm_data) {
 /**
  * Creates the window manager spec
  *
- * @return The spec factory
+ * @return The window manager spec factory
  */
 WindowManagerSpecFactory window_manager_spec_factory_hyprland() {
     return (WindowManagerSpecFactory){

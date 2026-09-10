@@ -422,7 +422,7 @@ static void data_fetcher(WwtWindowManagerData *wm_data) {
 /**
  * Create the window manager spec
  *
- * @return (transfer full): The fully created window manager spec
+ * @return The window manager spec factory
  */
 WindowManagerSpecFactory window_manager_spec_factory_sway() {
     return (WindowManagerSpecFactory){
