@@ -1,7 +1,5 @@
 # Waybar Workspace Taskbar
 
-**Seems to be fairly stable but still considered alpha. Changes are likely.**
-
 Workspace taskbar for window managers that shows only open windows from the current workspace. This differs from included wlr taskbar which shows all open windows on all workspaces. This takes advantage of the waybar cffi module [Waybar CFFI](https://github.com/Alexays/Waybar/wiki/Module:-CFFI).
 
 This was developed mostly due to non traditional window manager layouts like scrolling, fullscreen tabbed, or monocle where you can easily lose track of your open windows. This gives you the ability to easily visualize your open windows. Tabs will try to be sorted so they reflect the left and right cycling positions of your windows. All floating windows will be sorted to the end in the order they are received.
@@ -58,24 +56,24 @@ Minimal example:
 
 Note: You may need to use absolute paths depending on your environment.
 
-### Installation with Nix Flakes
+### Installation And Configuration with Nix Flakes
 
 If you are using Nix Flakes, you can consume this module directly without building it manually.
 
 1. In your `flake.nix` inputs, add:
 
-   ```nix
-   waybar-workspace-taskbar.url = "github:stevekanger/waybar-workspace-taskbar/main";
-   ```
+```nix
+waybar-workspace-taskbar.url = "github:stevekanger/waybar-workspace-taskbar/main";
+```
 
 2. Then in your waybar config, configure the module like:
 
-   ```nix
-   "cffi/waybar-workspace-taskbar": {
-       "module_path": "${inputs.waybar-workspace-taskbar.packages.${system}.default}/waybar-workspace-taskbar.so",
-       "window-manager": "hyprland"
-   }
-   ```
+```nix
+"cffi/waybar-workspace-taskbar": {
+   "module_path": "${inputs.waybar-workspace-taskbar.packages.${system}.default}/waybar-workspace-taskbar.so",
+   "window-manager": "sway"
+}
+```
 
 ### Configuration Options
 
