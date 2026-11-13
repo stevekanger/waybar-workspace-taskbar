@@ -228,7 +228,8 @@ static void data_fetcher(WwtWindowManagerData *wm_data) {
         const gchar *address = json_object_get_string_member(client, "address");
         gint64 focusHistoryID =
             json_object_get_int_member(client, "focusHistoryID");
-        gint64 ws_id = json_object_get_int_member(ws, "id");
+        // Special workspaces (scratchpad) have no "id".
+        gint64 ws_id = json_object_get_int_member_with_default(ws, "id", 0);
         gboolean floating = json_object_get_boolean_member(client, "floating");
         const gchar *stable_id =
             json_object_get_string_member(client, "stableId");
