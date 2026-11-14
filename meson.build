@@ -31,7 +31,7 @@ shared_library('waybar-workspace-taskbar',
     src_files,
     include_directories: inc,
     dependencies: [
-        dependency('gtk+-3.0', version : ['>=3.22.0']),
+        dependency('gtk+-3.0', version: ['>=3.22.0']),
         dependency('json-glib-1.0', version: ['>=1.6']),
         dependency('gio-unix-2.0')
     ],
