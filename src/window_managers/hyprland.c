@@ -172,19 +172,31 @@ static int window_sort(gconstpointer a, gconstpointer b) {
  * @param wm_data The window manager data to populate
  */
 static void data_fetcher(WwtWindowManagerData *wm_data) {
-    g_autofree char *batch_json = ipc_fetch("[[BATCH]]j/monitors;j/clients;");
+    // A batch is split on ';', so a trailing one asks hyprland to run an empty
+    // request and append "unknown request" after the two documents below.
+    g_autofree char *batch_json = ipc_fetch("[[BATCH]]j/monitors;j/clients");
     if(!batch_json) {
         return;
     }
 
     char *split = strstr(batch_json, "\n\n");
     if(!split) {
+        g_warning("Waybar Workspace Taskbar: batch reply has no separator");
         return;
     }
     *split = '\0';
 
     char *monitors_json = batch_json;
     char *clients_json = split + 2;
+
+    // Cut the client list at its last ']' so anything hyprland appends after it
+    // cannot fail the parse and leave the taskbar empty.
+    char *clients_end = strrchr(clients_json, ']');
+    if(!clients_end) {
+        g_warning("Waybar Workspace Taskbar: batch reply has no client list");
+        return;
+    }
+    clients_end[1] = '\0';
 
     g_autoptr(JsonParser) monitors_parser = create_json_parser(monitors_json);
     if(!monitors_parser) {
